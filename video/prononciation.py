@@ -3,6 +3,11 @@
 # Remplacements appliqués uniquement au texte lu par la voix off.
 # L'ordre compte : les expressions longues avant les plus courtes.
 PRONONCIATION = [
+    ("12 à 14 AWG", "douze à quatorze A W G"),
+    ("XT90", "X T quatre-vingt-dix"),
+    ("PETG", "P E T G"),
+    ("ArduPlane", "Ardou-plane"),
+    ("CAO", "C A O"),
     ("730 000 et 1 400 000 francs CFA", "sept cent trente mille et un million quatre cent mille francs CFA"),
     ("120 000 à 160 000 francs CFA", "cent vingt mille à cent soixante mille francs CFA"),
     ("1 045", "mille quarante-cinq"),

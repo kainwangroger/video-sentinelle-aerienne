@@ -4,6 +4,7 @@ Usage (depuis la racine du dépôt) :
     python3 video/build.py                    # fiche technique du module IA
     python3 video/build.py --fiche projet     # fiche projet (drone VTOL)
     python3 video/build.py --fiche az         # longue vidéo « le SA-1 de A à Z », un fichier par chapitre
+    python3 video/build.py --fiche assemblage # conception, fabrication et assemblage en 3D
     python3 video/build.py --sans-voix        # sous-titres seuls
     python3 video/build.py --apercu           # une image PNG par scène dans output/apercu_<fiche>/
 """
@@ -44,6 +45,11 @@ FICHES = {
            "dossier": "sa1_de_a_a_z", "video": "sa1_de_a_a_z_complet.mp4", "storyboard": "storyboard_sa1_de_a_a_z.md",
            "titre_storyboard": "Storyboard — Le drone Sentinelle Aérienne SA-1 de A à Z", "fps": 25,
            "crf": 27, "audio": ["-b:a", "64k", "-ac", "1"], "vitesse": 1.0},
+    "assemblage": {"contenu": "assemblage.contenu", "visuels": "assemblage.visuels", "bandeau": "DE LA CONCEPTION AU PREMIER VOL",
+                   "dossier": "sa1_conception_assemblage", "video": "sa1_conception_assemblage_complet.mp4",
+                   "storyboard": "storyboard_sa1_conception_assemblage.md",
+                   "titre_storyboard": "Storyboard — SA-1 : de la conception au premier vol", "fps": 25,
+                   "crf": 27, "audio": ["-b:a", "64k", "-ac", "1"], "vitesse": 1.0},
 }
 SANS_BANDEAU = ("titre", "conclusion")
 
