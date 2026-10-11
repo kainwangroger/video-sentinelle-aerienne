@@ -1,6 +1,6 @@
 # Storyboard — Sentinelle Aérienne
 
-Vidéo explicative 1920×1080, 30 fps. Ce fichier est régénéré par `src/build.py` :
+Vidéo explicative 1920×1080, 30 fps. Ce fichier est régénéré par `python3 video/build.py` :
 les durées correspondent exactement à la vidéo produite.
 
 | # | Début | Durée | Scène | Narration / sous-titres |

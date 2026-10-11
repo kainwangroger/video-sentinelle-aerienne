@@ -1,0 +1,7 @@
+source,type,usage,classes,volume,licence,acces,etat
+FOD-A v2.1 (Pascal VOC),public,entrainement+validation,debris,"31 catégories, >30 000 instances, 300x300",voir dépôt FOD-UNOmaha/FOD-data (citation requise),https://github.com/FOD-UNOmaha/FOD-data,à télécharger
+Images caméra du projet,collecte propre,entrainement+validation+test,personne/vehicule/debris,à constituer,propriété SkyVision Togo,vidéos d'essais sur surface autorisée,à collecter
+YOLO-URD (2026),publication,entrainement (option),debris,"~6 000 images, UAV 2-6 m",à vérifier,à demander aux auteurs,accès et licence à vérifier
+Exemples négatifs,collecte propre,entrainement+validation+test,aucune,à constituer,propriété SkyVision Togo,mêmes séquences que les images du projet,à collecter
+YOLOv8s pré-entraîné COCO,poids,initialisation,personne/vehicule (COCO),22 Mo,AGPL-3.0 (Ultralytics),https://github.com/ultralytics/assets/releases,téléchargeable
+Échantillon synthétique,généré,tests et démonstration uniquement,personne/vehicule/debris,"120 images + vidéo 24 s",même licence que ce dépôt,donnees/echantillon_synthetique,présent

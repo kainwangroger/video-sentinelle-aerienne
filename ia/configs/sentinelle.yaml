@@ -1,0 +1,69 @@
+# Configuration de référence : Raspberry Pi 5 + AI HAT+ 26 TOPS (Hailo-8).
+# Les chemins relatifs partent du dossier ia/.
+
+mission:
+  sequence_id: VOL-001            # remplacé par --sequence au lancement de chaque vol / essai
+
+capture:
+  # Flux réellement fourni par la caméra stabilisée : à confirmer avec le lot mécanique/électronique.
+  #   0 ou "0"           : /dev/video0 (carte d'acquisition HDMI/USB reliée à la nacelle)
+  #   "rtsp://..."       : flux réseau de l'encodeur vidéo
+  #   "picamera2"        : module caméra CSI du Raspberry Pi
+  source: 0
+  largeur: 1920
+  hauteur: 1080
+  cadence_max: null              # img/s ; null = au rythme de la source
+
+detecteur:
+  moteur: hailo                  # hailo | onnx | ultralytics | factice
+  modele: modeles/sentinelle_yolov8s.hef
+  classes: [personne, vehicule, debris]
+  taille_entree: 640             # premier essai ; voir docs/protocole_validation.md pour les tuiles
+  seuil_candidat: 0.15           # candidats plus faibles ignorés
+  seuil_iou: 0.45
+  tuiles: null                   # ex. [2, 2] si les débris sont trop petits (coût x5 en inférence)
+  recouvrement_tuiles: 0.2
+
+zone_interet:
+  # Polygone normalisé (0..1) couvrant la piste et ses abords dans l'image.
+  # null = toute l'image. Peut être fourni par l'interface de mission.
+  polygone: null
+
+suivi:
+  iou_min: 0.2
+  distance_max: 1.5
+  images_confirmation: 3         # persistance avant alerte (réduit les artefacts d'une seule image)
+  fenetre_confirmation: 6
+  images_perdues_max: 15
+  seuil_classe: 0.5              # en dessous : statut « à vérifier »
+  seuil_a_verifier: 0.3          # en dessous : candidat ignoré (à régler sur la validation)
+  marge_bord: 0.03               # objet entrant par le bord : attendre qu'il soit entier...
+  images_max_au_bord: 12         # ... sauf s'il reste au bord ce nombre d'images
+  part_classe_min: 0.6
+
+anomalie:                        # branche expérimentale, à valider avant activation
+  active: false
+  reference: null                # image de piste libre
+  seuil_alignement: 0.85
+  seuil_difference: 40
+  aire_min: 80
+
+alerte:
+  dossier_preuves: travail/preuves
+  inclure_image_dans_message: true
+
+journal:
+  base: travail/journal.sqlite
+
+liaison:
+  # Transport défini par le lot réseau et sécurité.
+  type: https
+  url: https://station-sol.local:8443/api/evenements
+  variable_jeton: SENTINELLE_JETON      # jeton d'authentification lu dans l'environnement
+  certificat_ca: /etc/sentinelle/station_ca.pem
+  delai: 5
+  taille_max: 256000                    # octets ; l'image est retirée du message au-delà
+
+metriques:
+  csv: travail/metriques.csv
+  periode: 5
