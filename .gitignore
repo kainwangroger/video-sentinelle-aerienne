@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+voices/
+output/apercu*/
+output/voix_off*.wav
+ia/travail/
+ia/runs/

@@ -1,0 +1,28 @@
+# Poste de développement ou Raspberry Pi sans accélérateur : modèle ONNX + onnxruntime.
+# Sert de référence pour comparer le modèle compilé Hailo au modèle d'origine.
+
+mission:
+  sequence_id: BANC-PC
+
+capture:
+  source: donnees/echantillon_synthetique/demo/piste_demo.mp4
+
+detecteur:
+  moteur: onnx
+  modele: modeles/sentinelle_yolov8s.onnx
+  classes: [personne, vehicule, debris]
+  taille_entree: 640
+  threads: 4
+
+alerte:
+  dossier_preuves: travail/pc/preuves
+
+journal:
+  base: travail/pc/journal.sqlite
+
+liaison:
+  type: dossier
+  dossier: travail/pc/station_sol
+
+metriques:
+  csv: travail/pc/metriques.csv

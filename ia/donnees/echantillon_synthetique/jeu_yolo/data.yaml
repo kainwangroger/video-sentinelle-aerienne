@@ -1,0 +1,9 @@
+# Jeu SYNTHÉTIQUE : uniquement pour tester la chaîne, pas pour entraîner le modèle de mission.
+# chemins relatifs au dossier de ce fichier
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: personne
+  1: vehicule
+  2: debris

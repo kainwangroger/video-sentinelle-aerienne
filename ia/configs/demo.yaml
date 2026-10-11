@@ -1,0 +1,35 @@
+# Démonstration sans modèle entraîné : vidéo synthétique + détecteur factice (rejoue la
+# vérité terrain avec du bruit, des oublis et de fausses détections). Vérifie la chaîne
+# zone -> suivi -> alerte -> journal -> liaison, PAS la qualité de détection.
+
+mission:
+  sequence_id: DEMO-SYNTH
+
+capture:
+  source: donnees/echantillon_synthetique/demo/piste_demo.mp4
+
+detecteur:
+  moteur: factice
+  annotations: donnees/echantillon_synthetique/demo/piste_demo_annotations.json
+  taux_oubli: 0.15
+  taux_fausse_detection: 0.1
+
+zone_interet:
+  polygone: [[0.08, 0.0], [0.92, 0.0], [0.92, 1.0], [0.08, 1.0]]
+
+anomalie:
+  active: false
+  reference: donnees/echantillon_synthetique/demo/reference_piste_libre.jpg
+
+alerte:
+  dossier_preuves: travail/demo/preuves
+
+journal:
+  base: travail/demo/journal.sqlite
+
+liaison:
+  type: dossier                  # liaison simulée : un fichier JSON par événement
+  dossier: travail/demo/station_sol
+
+metriques:
+  csv: travail/demo/metriques.csv

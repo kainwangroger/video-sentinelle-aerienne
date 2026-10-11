@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skyvision-togo/sentinelle-aerienne/evenement/1.0",
+  "title": "Événement d'alerte Sentinelle Aérienne",
+  "description": "Message transmis par le module IA à la station au sol. Interface à valider avec les lots back-end et réseau.",
+  "type": "object",
+  "required": ["id", "horodatage", "sequence_id", "piste_id", "numero_image", "statut", "score", "boite",
+               "taille_image", "source", "version_schema"],
+  "properties": {
+    "id": {"type": "string", "format": "uuid", "description": "Identifiant unique de l'événement"},
+    "horodatage": {"type": "string", "format": "date-time", "description": "Heure UTC de l'image de confirmation"},
+    "sequence_id": {"type": "string", "description": "Identifiant du vol / de l'essai"},
+    "piste_id": {"type": "integer", "description": "Identifiant de l'objet suivi dans la séquence"},
+    "numero_image": {"type": "integer", "minimum": 0},
+    "statut": {"enum": ["classe_confirmee", "a_verifier"],
+               "description": "a_verifier : candidat crédible sans classe stable/fiable, ou anomalie"},
+    "classe": {"type": ["string", "null"], "enum": ["personne", "vehicule", "debris", "inconnu", null],
+               "description": "Classe proposée (indicative si statut = a_verifier)"},
+    "score": {"type": "number", "minimum": 0, "maximum": 1},
+    "boite": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4,
+              "description": "Rectangle [x1, y1, x2, y2] en pixels de l'image"},
+    "taille_image": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2},
+    "source": {"enum": ["detecteur", "anomalie"]},
+    "image_preuve": {"type": ["string", "null"], "description": "Chemin de la preuve conservée à bord"},
+    "image_preuve_jpeg_base64": {"type": "string", "description": "Preuve JPEG encodée (omise si trop lourde)"},
+    "position": {
+      "type": ["object", "null"],
+      "description": "Position au sol estimée : null tant que la calibration caméra-sol n'est pas validée",
+      "properties": {
+        "latitude": {"type": "number"}, "longitude": {"type": "number"},
+        "erreur_estimee_m": {"type": "number"}
+      }
+    },
+    "telemetrie": {
+      "type": ["object", "null"],
+      "description": "Position/attitude du drone à l'instant de l'image (fournie par le lot embarqué)"
+    },
+    "version_schema": {"type": "string"},
+    "version_logiciel": {"type": "string"}
+  },
+  "additionalProperties": false
+}

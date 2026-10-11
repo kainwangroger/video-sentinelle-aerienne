@@ -1,0 +1,15 @@
+# Jeu d'entraînement de mission : images du projet (séparées par séquence) + FOD-A.
+# Le test final ne contient QUE des séquences du projet tenues à l'écart.
+# Chemins relatifs au dossier de ce fichier (configs/).
+train:
+  - ../travail/jeu_projet/images/train
+  - ../travail/fod_a_yolo/images/train
+val:
+  - ../travail/jeu_projet/images/val
+  - ../travail/fod_a_yolo/images/val
+test:
+  - ../travail/jeu_projet/images/test
+names:
+  0: personne
+  1: vehicule
+  2: debris

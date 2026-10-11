@@ -1,0 +1,11 @@
+# Poste de développement (entraînement, export, évaluation, tests)
+numpy
+pyyaml
+opencv-python-headless
+pillow
+ultralytics>=8.1     # YOLOv8 : fine-tuning et export ONNX
+onnx
+onnxruntime
+onnxslim
+pytest
+jsonschema

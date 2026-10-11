@@ -1,0 +1,27 @@
+{
+ "id": "3c86147d-282a-40f1-bf32-e6fa27dba7d4",
+ "horodatage": "2026-10-11T14:09:13.139+00:00",
+ "sequence_id": "DEMO-SYNTH",
+ "piste_id": 4,
+ "numero_image": 58,
+ "statut": "classe_confirmee",
+ "classe": "vehicule",
+ "score": 0.776,
+ "boite": [
+  603.3,
+  32.7,
+  644.2,
+  109.0
+ ],
+ "taille_image": [
+  1280,
+  720
+ ],
+ "source": "detecteur",
+ "image_preuve": "travail/preuves/2026-10-11_DEMO-SYNTH_3c86147d.jpg",
+ "position": null,
+ "telemetrie": null,
+ "version_schema": "1.0",
+ "version_logiciel": "0.1.0",
+ "image_preuve_jpeg_base64": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJ…"
+}

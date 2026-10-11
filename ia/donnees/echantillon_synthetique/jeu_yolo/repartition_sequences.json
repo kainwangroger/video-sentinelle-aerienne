@@ -1,0 +1,14 @@
+{
+ "synth006": "test",
+ "synth001": "test",
+ "synth009": "val",
+ "synth008": "val",
+ "synth011": "train",
+ "synth000": "train",
+ "synth002": "train",
+ "synth003": "train",
+ "synth005": "train",
+ "synth007": "train",
+ "synth004": "train",
+ "synth010": "train"
+}

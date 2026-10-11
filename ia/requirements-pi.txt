@@ -1,0 +1,4 @@
+# Raspberry Pi 5 : opencv, picamera2 et hailo_platform viennent d'apt (python3-opencv, python3-picamera2, hailo-all)
+numpy
+pyyaml
+onnxruntime    # repli sans accélérateur et comparaison
