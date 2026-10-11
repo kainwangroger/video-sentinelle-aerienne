@@ -1,0 +1,75 @@
+# Sentinelle Aérienne SA-1 — paramètres de DÉPART pour ArduPlane 4.5+ (QuadPlane)
+#
+# ATTENTION : point de départ documenté, PAS un réglage prêt à voler.
+# - vérifier chaque valeur dans la documentation ArduPilot de la version installée
+#   (certains noms changent entre versions) ;
+# - affecter les sorties SERVOn_FUNCTION selon le câblage réel ;
+# - faire les calibrations (accéléromètres, compas, radio, ESC, vitesse air) ;
+# - régler les PID en vol stationnaire (QHOVER) puis en avion (AUTOTUNE) progressivement.
+# Import : Mission Planner > Config > Full Parameter List > Load from file.
+
+# --- QuadPlane : 4 moteurs verticaux en X
+Q_ENABLE,1
+Q_FRAME_CLASS,1
+Q_FRAME_TYPE,1
+Q_ANGLE_MAX,3000
+Q_ASSIST_SPEED,13
+Q_TRANSITION_MS,5000
+Q_RTL_MODE,1
+Q_LAND_FINAL_ALT,6
+Q_LAND_SPEED,50
+Q_WP_SPEED_DN,150
+
+# --- Vitesses air (m/s) : décrochage estimé 12,3 m/s
+ARSPD_USE,1
+AIRSPEED_MIN,15
+AIRSPEED_CRUISE,19
+AIRSPEED_MAX,26
+
+# --- Retour au point de départ
+RTL_ALTITUDE,60
+RTL_RADIUS,80
+
+# --- Fail-safes radiocommande (perte de signal)
+THR_FAILSAFE,1
+FS_SHORT_TIMEOUT,1.5
+FS_SHORT_ACTN,0
+FS_LONG_TIMEOUT,5
+FS_LONG_ACTN,1
+
+# --- Fail-safe station sol (perte de télémétrie) : 0 = continuer la mission, 1 = retour
+FS_GCS_ENABL,1
+
+# --- Batterie LiPo 6S 16 000 mAh (BATT_MONITOR selon le module de puissance installé)
+BATT_CAPACITY,16000
+BATT_LOW_VOLT,21.0
+BATT_CRT_VOLT,19.8
+BATT_LOW_MAH,4000
+BATT_CRT_MAH,2400
+# action batterie basse : 1 = RTL ; critique : 4 = QLAND (atterrissage vertical immédiat)
+BATT_FS_LOW_ACT,1
+BATT_FS_CRT_ACT,4
+
+# --- Géorepérage : altitude max + cercle + polygone, action retour
+FENCE_ENABLE,1
+FENCE_TYPE,7
+FENCE_ACTION,1
+FENCE_RADIUS,800
+FENCE_ALT_MAX,120
+
+# --- Sécurité au sol
+ARMING_CHECK,1
+BRD_SAFETY_DEFLT,1
+# voie 7 de la radiocommande : coupure d'urgence des moteurs (Motor Emergency Stop)
+RC7_OPTION,31
+
+# --- Sorties (exemple de câblage, À ADAPTER)
+# 33..36 = moteurs VTOL 1 à 4, 70 = moteur de croisière, 4 = ailerons, 19 = profondeur, 21 = direction
+SERVO1_FUNCTION,4
+SERVO2_FUNCTION,19
+SERVO3_FUNCTION,70
+SERVO4_FUNCTION,21
+SERVO5_FUNCTION,33
+SERVO6_FUNCTION,34
+SERVO7_FUNCTION,35
+SERVO8_FUNCTION,36

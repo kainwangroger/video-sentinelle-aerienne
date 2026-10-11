@@ -3,6 +3,7 @@
 Usage (depuis la racine du dépôt) :
     python3 video/build.py                    # fiche technique du module IA
     python3 video/build.py --fiche projet     # fiche projet (drone VTOL)
+    python3 video/build.py --fiche az         # longue vidéo « le SA-1 de A à Z », un fichier par chapitre
     python3 video/build.py --sans-voix        # sous-titres seuls
     python3 video/build.py --apercu           # une image PNG par scène dans output/apercu_<fiche>/
 """
@@ -28,7 +29,7 @@ from gfx import (BLANC, CYAN, CYAN_SOMBRE, GRIS, H, W, apparition, avec_alpha, b
 RACINE = Path(__file__).resolve().parent.parent
 SORTIE = RACINE / "output"
 VOIX_PAR_DEFAUT = RACINE / "voices" / "fr-siwis-medium.onnx"
-FPS = 30
+FPS = 30  # remplacé par la clé « fps » d'une fiche
 FONDU = 0.45  # fondu au noir entre les scènes (s)
 
 # Une entrée par vidéo : modules de contenu et d'animation, fichiers produits.
@@ -39,6 +40,10 @@ FICHES = {
     "projet": {"contenu": "contenu_projet", "visuels": "visuels_projet", "bandeau": "DRONE HYBRIDE VTOL",
                "video": "sentinelle_aerienne_projet.mp4", "storyboard": "storyboard_projet.md",
                "titre_storyboard": "Storyboard — Sentinelle Aérienne (fiche projet)"},
+    "az": {"contenu": "az.contenu", "visuels": "az.visuels", "bandeau": "LE SA-1 DE A À Z",
+           "dossier": "sa1_de_a_a_z", "video": "sa1_de_a_a_z_complet.mp4", "storyboard": "storyboard_sa1_de_a_a_z.md",
+           "titre_storyboard": "Storyboard — Le drone Sentinelle Aérienne SA-1 de A à Z", "fps": 25,
+           "crf": 27, "audio": ["-b:a", "64k", "-ac", "1"], "vitesse": 1.0},
 }
 SANS_BANDEAU = ("titre", "conclusion")
 
@@ -46,14 +51,18 @@ _FOND = None
 _PLAN = None
 _TOTAL = None
 _VISUELS = None
+_AVEC_SCENE = False
 _BANDEAU = None
 
 
 def _init(plan, total, fiche):
-    global _FOND, _PLAN, _TOTAL, _VISUELS, _BANDEAU
+    global _FOND, _PLAN, _TOTAL, _VISUELS, _AVEC_SCENE, _BANDEAU, FPS
     _FOND, _PLAN, _TOTAL = fond(), plan, total
-    _VISUELS = importlib.import_module(FICHES[fiche]["visuels"]).SCENES_VISUELLES
+    module = importlib.import_module(FICHES[fiche]["visuels"])
+    _VISUELS = module.SCENES_VISUELLES
+    _AVEC_SCENE = getattr(module, "AVEC_SCENE", False)  # les fonctions reçoivent aussi la scène
     _BANDEAU = FICHES[fiche]["bandeau"]
+    FPS = FICHES[fiche].get("fps", 30)
 
 
 def _scene_a(t):
@@ -67,7 +76,8 @@ def _bandeau(d, i, n, t_local, scene):
     texte(d, (80, 58), "SENTINELLE AÉRIENNE", "gras", 22, CYAN, a, "lm")
     texte(d, (80 + police("gras", 22).getlength("SENTINELLE AÉRIENNE") + 18, 58), f"|  {_BANDEAU}",
           "moyen", 22, GRIS, a, "lm")
-    texte(d, (W - 80, 58), f"{i + 1:02d} / {n:02d}", "gras", 22, GRIS, a, "rm")
+    repere = scene.get("repere") or f"{i + 1:02d} / {n:02d}"
+    texte(d, (W - 80, 58), repere, "gras", 22, GRIS, a, "rm")
     a = apparition(t_local, 0.15, 0.6)
     d.rectangle((80, 120, 88, 186), fill=avec_alpha(CYAN, a))
     texte(d, (110 + (1 - a) * 30, 153), scene["titre"], "titre", 58, BLANC, a, "lm")
@@ -95,8 +105,11 @@ def image(numero_frame):
     img = _FOND.copy()
     d = ImageDraw.Draw(img, "RGBA")
     marques = [debut for _, debut, _ in p["phrases"]]
-    _VISUELS[scene["id"]](d, t_local, p["duree"], marques)
-    if scene["id"] not in SANS_BANDEAU:
+    if _AVEC_SCENE:
+        _VISUELS[scene.get("visuel", scene["id"])](d, t_local, p["duree"], marques, scene)
+    else:
+        _VISUELS[scene["id"]](d, t_local, p["duree"], marques)
+    if scene["id"] not in SANS_BANDEAU and not scene.get("sans_bandeau"):
         _bandeau(d, i, len(_PLAN), t_local, scene)
     _sous_titre(d, p["phrases"], t_local)
     # barre de progression globale
@@ -120,7 +133,7 @@ def ecrire_wav(chemin, audio, sr):
 
 def ecrire_storyboard(plan, chemin, titre, descriptions, commande):
     lignes = [f"# {titre}", "",
-              f"Vidéo explicative 1920×1080, 30 fps. Ce fichier est régénéré par `{commande}` :",
+              f"Vidéo explicative 1920×1080. Ce fichier est régénéré par `{commande}` :",
               "les durées correspondent exactement à la vidéo produite.", "",
               "| # | Début | Durée | Scène | Narration / sous-titres |", "|---|---|---|---|---|"]
     for i, p in enumerate(plan):
@@ -131,7 +144,8 @@ def ecrire_storyboard(plan, chemin, titre, descriptions, commande):
     lignes += ["", f"Durée totale : {int(total // 60)} min {total % 60:.0f} s", "",
                "## Contenu visuel par scène", ""]
     for i, p in enumerate(plan):
-        lignes.append(f"{i + 1}. **{p['scene']['titre']}** — {descriptions[p['scene']['id']]}")
+        description = descriptions.get(p["scene"]["id"]) or p["scene"].get("description", "")
+        lignes.append(f"{i + 1}. **{p['scene']['titre']}** — {description}")
     chemin.write_text("\n".join(lignes) + "\n", encoding="utf-8")
 
 
@@ -143,10 +157,12 @@ def main():
     parser.add_argument("--fiche", choices=sorted(FICHES), default="technique")
     parser.add_argument("--voix", default=str(VOIX_PAR_DEFAUT), help="modèle Piper .onnx")
     parser.add_argument("--sans-voix", action="store_true")
-    parser.add_argument("--vitesse", type=float, default=0.9, help="length_scale Piper (< 1 = plus rapide)")
+    parser.add_argument("--vitesse", type=float, default=None,
+                        help="length_scale Piper (< 1 = plus rapide ; défaut 0.9, 1.0 pour la fiche az)")
     parser.add_argument("--apercu", action="store_true", help="exporter une image par scène au lieu de la vidéo")
     parser.add_argument("--processus", type=int, default=4)
-    parser.add_argument("--crf", type=int, default=21)
+    parser.add_argument("--crf", type=int, default=None)
+    parser.add_argument("--chapitres", help="ne rendre que ces chapitres (ex. 1,3-5) — fiche az")
     args = parser.parse_args()
 
     SORTIE.mkdir(exist_ok=True)
@@ -156,7 +172,7 @@ def main():
     if not args.sans_voix:
         if Path(args.voix).exists():
             from tts import VoixOff
-            voix = VoixOff(args.voix, length_scale=args.vitesse)
+            voix = VoixOff(args.voix, length_scale=args.vitesse or config.get("vitesse", 0.9))
         else:
             print(f"Modèle de voix introuvable ({args.voix}) : vidéo sans voix off. "
                   "Lancez scripts/get_voice.sh pour l'installer.")
@@ -167,38 +183,91 @@ def main():
     ecrire_storyboard(plan, RACINE / config["storyboard"], config["titre_storyboard"], contenu.DESCRIPTIONS, commande)
     print(f"Durée : {total:.1f} s, {len(plan)} scènes")
 
+    _init(plan, total, args.fiche)  # fixe aussi FPS dans ce processus
+    crf = args.crf if args.crf is not None else config.get("crf", 21)
     if args.apercu:
-        _init(plan, total, args.fiche)
         dossier = SORTIE / f"apercu_{args.fiche}"
         dossier.mkdir(exist_ok=True)
         for i, p in enumerate(plan):
-            n = int((p["debut"] + p["duree"] - 1.2) * FPS)
+            n = int((p["debut"] + p["duree"] * 0.85) * FPS)
             Image.frombytes("RGB", (W, H), image(n)).save(dossier / f"{i + 1:02d}_{p['scene']['id']}.png")
         print(f"Aperçus dans {dossier}")
         return
 
-    commande = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
-                "-r", str(FPS), "-i", "-"]
+    if config.get("dossier"):
+        rendre_par_chapitre(plan, audio, sr, total, args, config, crf)
+        return
+    sortie = SORTIE / config["video"]
+    wav = None
     if audio is not None:
         wav = SORTIE / f"voix_off_{args.fiche}.wav"
         ecrire_wav(wav, audio, sr)
-        commande += ["-i", str(wav), "-c:a", "aac", "-b:a", "128k", "-ar", "44100"]
-    commande += ["-c:v", "libx264", "-preset", "medium", "-crf", str(args.crf), "-pix_fmt", "yuv420p",
-                 "-movflags", "+faststart", "-shortest" if audio is not None else "-an",
-                 str(SORTIE / config["video"])]
+    encoder(range(int(round(total * FPS))), wav, sortie, plan, total, args, config, crf)
+    print(f"Vidéo écrite : {sortie}")
 
-    n_frames = int(round(total * FPS))
-    print(f"Rendu de {n_frames} images…")
+
+def encoder(numeros, wav, sortie, plan, total, args, config, crf):
+    """Rend les images `numeros` et les encode (avec la piste audio `wav` si fournie)."""
+    commande = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
+                "-r", str(FPS), "-i", "-"]
+    if wav is not None:
+        commande += ["-i", str(wav), "-c:a", "aac", *config.get("audio", ["-b:a", "128k"]), "-ar", "44100"]
+    commande += ["-c:v", "libx264", "-preset", "medium", "-crf", str(crf), "-pix_fmt", "yuv420p",
+                 "-movflags", "+faststart", "-shortest" if wav is not None else "-an", str(sortie)]
+    print(f"Rendu de {len(numeros)} images -> {sortie.name}")
     ff = subprocess.Popen(commande, stdin=subprocess.PIPE)
     with Pool(args.processus, initializer=_init, initargs=(plan, total, args.fiche)) as pool:
-        for k, octets in enumerate(pool.imap(image, range(n_frames), chunksize=8)):
+        for k, octets in enumerate(pool.imap(image, numeros, chunksize=8)):
             ff.stdin.write(octets)
-            if k % (FPS * 10) == 0:
-                print(f"  {k / FPS:5.0f} s / {total:.0f} s", flush=True)
+            if k % (FPS * 30) == 0:
+                print(f"  {k / FPS:5.0f} s / {len(numeros) / FPS:.0f} s", flush=True)
     ff.stdin.close()
     if ff.wait() != 0:
         sys.exit("ffmpeg a échoué")
-    print(f"Vidéo écrite : {SORTIE / config['video']}")
+
+
+def _selection(texte_chapitres, n):
+    if not texte_chapitres:
+        return set(range(1, n + 1))
+    choix = set()
+    for morceau in texte_chapitres.split(","):
+        a, _, b = morceau.partition("-")
+        choix.update(range(int(a), int(b or a) + 1))
+    return choix
+
+
+def rendre_par_chapitre(plan, audio, sr, total, args, config, crf):
+    """Un MP4 par chapitre, puis assemblage sans réencodage en une vidéo complète."""
+    dossier = SORTIE / config["dossier"]
+    dossier.mkdir(parents=True, exist_ok=True)
+    chapitres = {}
+    for p in plan:
+        chapitres.setdefault(p["scene"]["chapitre"], []).append(p)
+    choix = _selection(args.chapitres, len(chapitres))
+    fichiers = []
+    for numero, scenes in sorted(chapitres.items()):
+        debut = scenes[0]["debut"]
+        fin = scenes[-1]["debut"] + scenes[-1]["duree"]
+        nom = f"{numero:02d}_{scenes[0]['scene']['chapitre_id']}.mp4"
+        fichiers.append(dossier / nom)
+        if numero not in choix:
+            continue
+        wav = None
+        if audio is not None:
+            wav = dossier / f"voix_{numero:02d}.wav"
+            ecrire_wav(wav, audio[int(debut * sr):int(fin * sr)], sr)
+        numeros = range(int(round(debut * FPS)), int(round(fin * FPS)))
+        encoder(numeros, wav, dossier / nom, plan, total, args, config, crf)
+        if wav:
+            wav.unlink()
+    if all(f.exists() for f in fichiers):
+        liste = dossier / "liste.txt"
+        liste.write_text("".join(f"file '{f.name}'\n" for f in fichiers))
+        complet = dossier / config["video"]
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(liste),
+                        "-c", "copy", "-movflags", "+faststart", str(complet)], check=True)
+        liste.unlink()
+        print(f"Vidéo complète : {complet}")
 
 
 if __name__ == "__main__":
