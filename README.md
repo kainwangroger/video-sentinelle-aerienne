@@ -6,8 +6,9 @@ Ce dépôt regroupe :
    expliqué, calculs de dimensionnement, paramètres ArduPilot, check-lists, schémas, Word et PDF ;
 2. **Le module d'IA embarquée** (`ia/`) : implémentation de la fiche technique du lot IA
    (code, outils, données, configuration, déploiement, tests) ;
-3. **Trois vidéos** générées par code (`video/`, `output/`), dont une longue vidéo
-   « Le SA-1 de A à Z » avec simulation de mission.
+3. **Quatre vidéos** générées par code (`video/`, `output/`), dont « Le SA-1 de A à Z »
+   (chaque composant, simulation de mission) et « De la conception au premier vol »
+   (fabrication et assemblage animés en 3D).
 
 | Source | Contenu |
 |---|---|
@@ -19,6 +20,7 @@ Ce dépôt regroupe :
 | Document | Contenu |
 |---|---|
 | [`drone/fiche_technique_complete.md`](drone/fiche_technique_complete.md) ([Word](drone/fiche_technique_complete.docx), [PDF](drone/fiche_technique_complete.pdf)) | Les bases du vol, puis chaque composant : à quoi il sert, comment il marche, notre choix et pourquoi |
+| [`drone/guide_conception_assemblage.md`](drone/guide_conception_assemblage.md) ([Word](drone/guide_conception_assemblage.docx), [PDF](drone/guide_conception_assemblage.pdf)) | De la conception au premier vol : fabrication, assemblage, câblage, configuration, essais |
 | [`drone/glossaire.md`](drone/glossaire.md) | Tous les termes techniques expliqués |
 | [`drone/calculs/`](drone/calculs/) | Masse, portance, puissance, autonomie (script + résultats) |
 | [`drone/parametres_ardupilot/`](drone/parametres_ardupilot/) | Paramètres de départ du contrôleur de vol |
@@ -49,6 +51,7 @@ guide d'annotation, échantillon synthétique). Conversion Hailo :
 | [`output/sentinelle_aerienne.mp4`](output/sentinelle_aerienne.mp4) — fiche technique du module IA | 3 min 08 | [`storyboard.md`](storyboard.md) |
 | [`output/sentinelle_aerienne_projet.mp4`](output/sentinelle_aerienne_projet.mp4) — fiche projet (drone VTOL) | 2 min 47 | [`storyboard_projet.md`](storyboard_projet.md) |
 | [`output/sa1_de_a_a_z/`](output/sa1_de_a_a_z/) — **le SA-1 de A à Z**, 16 chapitres + vidéo complète | 36 min 26 | [`storyboard_sa1_de_a_a_z.md`](storyboard_sa1_de_a_a_z.md) |
+| [`output/sa1_conception_assemblage/`](output/sa1_conception_assemblage/) — **de la conception au premier vol**, assemblage animé en 3D, 13 chapitres | 19 min 41 | [`storyboard_sa1_conception_assemblage.md`](storyboard_sa1_conception_assemblage.md) |
 
 1920×1080, 30 fps, H.264 + AAC, voix off française hors-ligne (Piper) et sous-titres incrustés.
 Tout est dessiné par code (Pillow) : aucune image, vidéo ou musique téléchargée.
@@ -64,6 +67,7 @@ python3 video/build.py                         # fiche technique → output/sent
 python3 video/build.py --fiche projet          # fiche projet  → output/sentinelle_aerienne_projet.mp4
 python3 video/build.py --fiche az              # SA-1 de A à Z → output/sa1_de_a_a_z/ (≈ 1 h de rendu)
 python3 video/build.py --fiche az --chapitres 15   # un seul chapitre
+python3 video/build.py --fiche assemblage      # conception et assemblage 3D → output/sa1_conception_assemblage/
 ```
 
 | Option | Effet |
@@ -80,6 +84,7 @@ python3 video/build.py --fiche az --chapitres 15   # un seul chapitre
 | `video/prononciation.py` | prononciation des sigles par la voix off |
 | `video/gfx.py` | palette bleu nuit / cyan, polices, formes, pictogrammes |
 | `video/az/` | longue vidéo : chapitres (`chapitres_*.py`), gabarits de scènes, pictogrammes, animations, simulation de mission |
+| `video/assemblage/` | moteur 3D (`moteur3d.py`), maquette du SA-1 pièce par pièce (`modele_sa1.py`), scènes d'assemblage animées |
 | `video/timeline.py`, `video/tts.py`, `video/build.py` | minutage, synthèse vocale, rendu et encodage |
 
 ### Voix off : limite connue
