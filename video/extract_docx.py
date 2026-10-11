@@ -1,6 +1,6 @@
 """Extrait le contenu de fiche_technique.docx en Markdown (output/fiche_extraite.md).
 
-Sert de référence pour écrire la narration de src/content.py :
+Sert de référence pour écrire la narration de video/contenu_*.py :
 paragraphes avec leurs niveaux de titre, puis tableaux.
 """
 

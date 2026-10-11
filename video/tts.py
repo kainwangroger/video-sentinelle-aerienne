@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from content import texte_parle
+from prononciation import texte_parle
 
 
 class VoixOff:

@@ -1,8 +1,8 @@
-"""Contenu de la vidéo : scènes, textes à l'écran et narration.
+"""Vidéo « fiche technique » : scènes, textes à l'écran et narration.
 
 Chaque scène contient une liste de phrases. Le texte affiché en sous-titre est
 la phrase telle qu'écrite ici ; la voix off lit la même phrase après passage
-dans le dictionnaire PRONONCIATION (sigles, chiffres, anglicismes).
+dans prononciation.py (sigles, chiffres, anglicismes).
 Tout le contenu est tiré de fiche_technique.docx.
 """
 
@@ -128,35 +128,20 @@ SCENES = [
     },
 ]
 
-# Remplacements appliqués uniquement au texte lu par la voix off.
-# L'ordre compte : les expressions longues avant les plus courtes.
-PRONONCIATION = [
-    ("640 × 640", "six cent quarante par six cent quarante"),
-    ("AI HAT+", "A I Hatte plus"),
-    ("26 TOPS", "vingt-six tops"),
-    ("NPU Hailo-8", "N P U Haïlo huit"),
-    ("Hailo", "Haïlo"),
-    ("Raspberry Pi 5", "Raspberry Paï cinq"),
-    ("Raspberry Pi", "Raspberry Paï"),
-    ("YOLOv8s", "Yolo vé huit esse"),
-    ("FOD-A", "Fod A"),
-    ("ONNX", "Onix"),
-    ("HEF", "H E F"),
-    ("INT8", "entiers huit bits"),
-    ("SkyVision", "Skaï Vision"),
-    ("CECFD", "C E C F D"),
-    ("ANAC", "Anac"),
-    ("30 000", "trente mille"),
-    ("fine-tuning", "affinage"),
-    ("back-end", "bak-ènde"),
-    ("cloud", "claoude"),
-    ("l'IA", "l'I A"),
-    ("une IA", "une I A"),
-    ("« à vérifier »", "à vérifier"),
-]
-
-
-def texte_parle(phrase: str) -> str:
-    for ecrit, dit in PRONONCIATION:
-        phrase = phrase.replace(ecrit, dit)
-    return phrase
+# Description des visuels, reprise dans le storyboard.
+DESCRIPTIONS = {
+    "titre": "drone vu de dessus avec ondes radar, titre animé, crédits SkyVision Togo / CECFD 2026 — ANAC.",
+    "mission": "piste en perspective, apparition d'un débris, d'une personne et d'un véhicule signalés ; un drone survole la piste avec son cône de caméra.",
+    "decision": "cartes Raspberry Pi 5 + AI HAT+ 26 TOPS, caméra vers les trois familles détectées, suivi d'un objet image après image (1 objet = 1 alerte).",
+    "perimetre": "tableau du périmètre : zone analysée, classes v1, traitement à bord (cloud barré), limite en ambre.",
+    "architecture": "schéma fonctionnel en 7 blocs apparaissant au fil de la narration, paquet de données circulant, légende accélérateur / logiciel.",
+    "choix": "trois cartes : détecteur compact (retenu), modèle génératif / vision-langage et segmentation (non retenus).",
+    "modele": "vue aérienne schématique avec rectangles de détection étiquetés, grille de tuiles 640×640, étapes YOLOv8s → fine-tuning → sortie.",
+    "inconnus": "candidat inconnu encadré en pointillés avec « ? », trois niveaux : objet à vérifier, détection d'anomalie, suivi multi-images.",
+    "donnees": "quatre cartes de sources : FOD-A (compteurs 31 catégories / 30 000+ instances), images du projet, YOLO-URD, exemples négatifs.",
+    "protocole": "frise en 6 étapes qui s'allument (préparer → déployer) et encadré du critère de sélection.",
+    "alerte": "fiche d'événement (exemple fictif) qui se remplit, liaison drone-station coupée puis stockage local, position au sol après calibration.",
+    "materiel": "empilement matériel (alimentation, Raspberry Pi 5, AI HAT+, caméra) et notes : repli 13 TOPS, stockage, outils.",
+    "validation": "trois étapes de validation puis essai en vol autorisé, six mesures, bandeau « aucun taux annoncé avant mesure ».",
+    "conclusion": "titre final, slogan et les cinq lots de l'équipe avec leurs responsables.",
+}

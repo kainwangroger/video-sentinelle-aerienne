@@ -1,12 +1,14 @@
-"""Génère la vidéo explicative « Sentinelle Aérienne ».
+"""Génère les vidéos explicatives « Sentinelle Aérienne ».
 
 Usage (depuis la racine du dépôt) :
-    python3 src/build.py                      # vidéo complète avec voix off
-    python3 src/build.py --sans-voix          # sous-titres seuls
-    python3 src/build.py --apercu             # une image PNG par scène dans output/apercu/
+    python3 video/build.py                    # fiche technique du module IA
+    python3 video/build.py --fiche projet     # fiche projet (drone VTOL)
+    python3 video/build.py --sans-voix        # sous-titres seuls
+    python3 video/build.py --apercu           # une image PNG par scène dans output/apercu_<fiche>/
 """
 
 import argparse
+import importlib
 import logging
 import subprocess
 import sys
@@ -20,10 +22,8 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import timeline  # noqa: E402
-from content import SCENES  # noqa: E402
 from gfx import (BLANC, CYAN, CYAN_SOMBRE, GRIS, H, W, apparition, avec_alpha, borne, couper, fond,  # noqa: E402
                  police, texte)
-from visuels import SCENES_VISUELLES  # noqa: E402
 
 RACINE = Path(__file__).resolve().parent.parent
 SORTIE = RACINE / "output"
@@ -31,14 +31,29 @@ VOIX_PAR_DEFAUT = RACINE / "voices" / "fr-siwis-medium.onnx"
 FPS = 30
 FONDU = 0.45  # fondu au noir entre les scènes (s)
 
+# Une entrée par vidéo : modules de contenu et d'animation, fichiers produits.
+FICHES = {
+    "technique": {"contenu": "contenu_technique", "visuels": "visuels_technique", "bandeau": "IA EMBARQUÉE",
+                  "video": "sentinelle_aerienne.mp4", "storyboard": "storyboard.md",
+                  "titre_storyboard": "Storyboard — Sentinelle Aérienne (fiche technique du module IA)"},
+    "projet": {"contenu": "contenu_projet", "visuels": "visuels_projet", "bandeau": "DRONE HYBRIDE VTOL",
+               "video": "sentinelle_aerienne_projet.mp4", "storyboard": "storyboard_projet.md",
+               "titre_storyboard": "Storyboard — Sentinelle Aérienne (fiche projet)"},
+}
+SANS_BANDEAU = ("titre", "conclusion")
+
 _FOND = None
 _PLAN = None
 _TOTAL = None
+_VISUELS = None
+_BANDEAU = None
 
 
-def _init(plan, total):
-    global _FOND, _PLAN, _TOTAL
+def _init(plan, total, fiche):
+    global _FOND, _PLAN, _TOTAL, _VISUELS, _BANDEAU
     _FOND, _PLAN, _TOTAL = fond(), plan, total
+    _VISUELS = importlib.import_module(FICHES[fiche]["visuels"]).SCENES_VISUELLES
+    _BANDEAU = FICHES[fiche]["bandeau"]
 
 
 def _scene_a(t):
@@ -50,7 +65,7 @@ def _scene_a(t):
 def _bandeau(d, i, n, t_local, scene):
     a = apparition(t_local, 0.0, 0.5)
     texte(d, (80, 58), "SENTINELLE AÉRIENNE", "gras", 22, CYAN, a, "lm")
-    texte(d, (80 + police("gras", 22).getlength("SENTINELLE AÉRIENNE") + 18, 58), "|  IA EMBARQUÉE",
+    texte(d, (80 + police("gras", 22).getlength("SENTINELLE AÉRIENNE") + 18, 58), f"|  {_BANDEAU}",
           "moyen", 22, GRIS, a, "lm")
     texte(d, (W - 80, 58), f"{i + 1:02d} / {n:02d}", "gras", 22, GRIS, a, "rm")
     a = apparition(t_local, 0.15, 0.6)
@@ -80,8 +95,8 @@ def image(numero_frame):
     img = _FOND.copy()
     d = ImageDraw.Draw(img, "RGBA")
     marques = [debut for _, debut, _ in p["phrases"]]
-    SCENES_VISUELLES[scene["id"]](d, t_local, p["duree"], marques)
-    if scene["id"] not in ("titre", "conclusion"):
+    _VISUELS[scene["id"]](d, t_local, p["duree"], marques)
+    if scene["id"] not in SANS_BANDEAU:
         _bandeau(d, i, len(_PLAN), t_local, scene)
     _sous_titre(d, p["phrases"], t_local)
     # barre de progression globale
@@ -103,9 +118,9 @@ def ecrire_wav(chemin, audio, sr):
         w.writeframes((np.clip(audio, -1, 1) * 32767).astype(np.int16).tobytes())
 
 
-def ecrire_storyboard(plan, chemin):
-    lignes = ["# Storyboard — Sentinelle Aérienne", "",
-              "Vidéo explicative 1920×1080, 30 fps. Ce fichier est régénéré par `src/build.py` :",
+def ecrire_storyboard(plan, chemin, titre, descriptions, commande):
+    lignes = [f"# {titre}", "",
+              f"Vidéo explicative 1920×1080, 30 fps. Ce fichier est régénéré par `{commande}` :",
               "les durées correspondent exactement à la vidéo produite.", "",
               "| # | Début | Durée | Scène | Narration / sous-titres |", "|---|---|---|---|---|"]
     for i, p in enumerate(plan):
@@ -116,31 +131,16 @@ def ecrire_storyboard(plan, chemin):
     lignes += ["", f"Durée totale : {int(total // 60)} min {total % 60:.0f} s", "",
                "## Contenu visuel par scène", ""]
     for i, p in enumerate(plan):
-        lignes.append(f"{i + 1}. **{p['scene']['titre']}** — {VISUELS[p['scene']['id']]}")
+        lignes.append(f"{i + 1}. **{p['scene']['titre']}** — {descriptions[p['scene']['id']]}")
     chemin.write_text("\n".join(lignes) + "\n", encoding="utf-8")
 
 
-VISUELS = {
-    "titre": "drone vu de dessus avec ondes radar, titre animé, crédits SkyVision Togo / CECFD 2026 — ANAC.",
-    "mission": "piste en perspective, apparition d'un débris, d'une personne et d'un véhicule signalés ; un drone survole la piste avec son cône de caméra.",
-    "decision": "cartes Raspberry Pi 5 + AI HAT+ 26 TOPS, caméra vers les trois familles détectées, suivi d'un objet image après image (1 objet = 1 alerte).",
-    "perimetre": "tableau du périmètre : zone analysée, classes v1, traitement à bord (cloud barré), limite en ambre.",
-    "architecture": "schéma fonctionnel en 7 blocs apparaissant au fil de la narration, paquet de données circulant, légende accélérateur / logiciel.",
-    "choix": "trois cartes : détecteur compact (retenu), modèle génératif / vision-langage et segmentation (non retenus).",
-    "modele": "vue aérienne schématique avec rectangles de détection étiquetés, grille de tuiles 640×640, étapes YOLOv8s → fine-tuning → sortie.",
-    "inconnus": "candidat inconnu encadré en pointillés avec « ? », trois niveaux : objet à vérifier, détection d'anomalie, suivi multi-images.",
-    "donnees": "quatre cartes de sources : FOD-A (compteurs 31 catégories / 30 000+ instances), images du projet, YOLO-URD, exemples négatifs.",
-    "protocole": "frise en 6 étapes qui s'allument (préparer → déployer) et encadré du critère de sélection.",
-    "alerte": "fiche d'événement (exemple fictif) qui se remplit, liaison drone-station coupée puis stockage local, position au sol après calibration.",
-    "materiel": "empilement matériel (alimentation, Raspberry Pi 5, AI HAT+, caméra) et notes : repli 13 TOPS, stockage, outils.",
-    "validation": "trois étapes de validation puis essai en vol autorisé, six mesures, bandeau « aucun taux annoncé avant mesure ».",
-    "conclusion": "titre final, slogan et les cinq lots de l'équipe avec leurs responsables.",
-}
 
 
 def main():
     logging.disable(logging.WARNING)  # avertissements de phonèmes de Piper
     parser = argparse.ArgumentParser()
+    parser.add_argument("--fiche", choices=sorted(FICHES), default="technique")
     parser.add_argument("--voix", default=str(VOIX_PAR_DEFAUT), help="modèle Piper .onnx")
     parser.add_argument("--sans-voix", action="store_true")
     parser.add_argument("--vitesse", type=float, default=0.9, help="length_scale Piper (< 1 = plus rapide)")
@@ -150,6 +150,8 @@ def main():
     args = parser.parse_args()
 
     SORTIE.mkdir(exist_ok=True)
+    config = FICHES[args.fiche]
+    contenu = importlib.import_module(config["contenu"])
     voix = None
     if not args.sans_voix:
         if Path(args.voix).exists():
@@ -159,14 +161,15 @@ def main():
             print(f"Modèle de voix introuvable ({args.voix}) : vidéo sans voix off. "
                   "Lancez scripts/get_voice.sh pour l'installer.")
     print("Synthèse et minutage…")
-    plan, audio, sr = timeline.construire(SCENES, voix)
+    plan, audio, sr = timeline.construire(contenu.SCENES, voix)
     total = sum(p["duree"] for p in plan)
-    ecrire_storyboard(plan, RACINE / "storyboard.md")
+    commande = "python3 video/build.py" + ("" if args.fiche == "technique" else f" --fiche {args.fiche}")
+    ecrire_storyboard(plan, RACINE / config["storyboard"], config["titre_storyboard"], contenu.DESCRIPTIONS, commande)
     print(f"Durée : {total:.1f} s, {len(plan)} scènes")
 
     if args.apercu:
-        _init(plan, total)
-        dossier = SORTIE / "apercu"
+        _init(plan, total, args.fiche)
+        dossier = SORTIE / f"apercu_{args.fiche}"
         dossier.mkdir(exist_ok=True)
         for i, p in enumerate(plan):
             n = int((p["debut"] + p["duree"] - 1.2) * FPS)
@@ -177,17 +180,17 @@ def main():
     commande = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
                 "-r", str(FPS), "-i", "-"]
     if audio is not None:
-        wav = SORTIE / "voix_off.wav"
+        wav = SORTIE / f"voix_off_{args.fiche}.wav"
         ecrire_wav(wav, audio, sr)
         commande += ["-i", str(wav), "-c:a", "aac", "-b:a", "128k", "-ar", "44100"]
     commande += ["-c:v", "libx264", "-preset", "medium", "-crf", str(args.crf), "-pix_fmt", "yuv420p",
                  "-movflags", "+faststart", "-shortest" if audio is not None else "-an",
-                 str(SORTIE / "sentinelle_aerienne.mp4")]
+                 str(SORTIE / config["video"])]
 
     n_frames = int(round(total * FPS))
     print(f"Rendu de {n_frames} images…")
     ff = subprocess.Popen(commande, stdin=subprocess.PIPE)
-    with Pool(args.processus, initializer=_init, initargs=(plan, total)) as pool:
+    with Pool(args.processus, initializer=_init, initargs=(plan, total, args.fiche)) as pool:
         for k, octets in enumerate(pool.imap(image, range(n_frames), chunksize=8)):
             ff.stdin.write(octets)
             if k % (FPS * 10) == 0:
@@ -195,7 +198,7 @@ def main():
     ff.stdin.close()
     if ff.wait() != 0:
         sys.exit("ffmpeg a échoué")
-    print(f"Vidéo écrite : {SORTIE / 'sentinelle_aerienne.mp4'}")
+    print(f"Vidéo écrite : {SORTIE / config['video']}")
 
 
 if __name__ == "__main__":
