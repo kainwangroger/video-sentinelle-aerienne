@@ -9,6 +9,8 @@ Ce dépôt regroupe :
 3. **Quatre vidéos** générées par code (`video/`, `output/`), dont « Le SA-1 de A à Z »
    (chaque composant, simulation de mission) et « De la conception au premier vol »
    (fabrication et assemblage animés en 3D).
+4. **Le pitch** (`pitch/`) : présentation PowerPoint de 17 diapos avec le script oral de
+   chaque intervenant (notes de l'orateur + `script_oral.docx`), ≈ 13 min.
 
 | Source | Contenu |
 |---|---|
