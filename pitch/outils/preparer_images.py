@@ -1,55 +1,36 @@
-"""Prépare les images du pitch (pitch/assets) à partir des schémas et de la maquette 3D du SA-1.
+"""Recadre les captures SolidWorks du drone (pitch/assets/cao/sources) pour les présentations.
 
-Usage : python3 pitch/outils/preparer_images.py
+Usage : python3 pitch/outils/preparer_images.py   -> pitch/assets/cao/cao_*.png
 """
 
-import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image
 
-RACINE = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(RACINE / "video"))
-
-from assemblage.modele_sa1 import catalogue  # noqa: E402
-from assemblage.moteur3d import Camera, Maillage, Objet, rendre  # noqa: E402
-from gfx import fond  # noqa: E402
-
-SCHEMAS = RACINE / "drone" / "schemas"
-SORTIE = RACINE / "pitch" / "assets"
-
-# Zones utiles des schémas (sans leur titre incrusté).
-RECADRAGES = {
-    "transition": (400, 200, 1880, 840),
-    "simulation_detection": (80, 210, 1840, 920),
-    "chaine_ia_bande": ("chaine_ia", (0, 380, 1920, 720)),
-}
+DOSSIER = Path(__file__).resolve().parents[1] / "assets" / "cao"
+SOURCES = DOSSIER / "sources"
 
 
-def vue_3d(nom, camera, eclatement=0.0):
-    """Rendu 3D sur fond transparent, rogné au plus près."""
-    camera.centre_ecran = (1600, 1100)
-    img = Image.new("RGBA", (3200, 2200), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img, "RGBA")
-    objets = []
-    for n, (m, decal) in catalogue().items():
-        s = m.sommets + np.asarray(decal, float) * eclatement
-        objets.append(Objet(Maillage(s, m.faces, m.couleur), nom=n))
-    rendre(d, camera, objets, sol=False)
-    img.crop(img.getbbox()).save(SORTIE / f"{nom}.png")
-    print(nom)
+def serre(im, marge):
+    """Recadre au plus près du drone (pixels plus sombres que le fond), avec une marge."""
+    a = np.asarray(im.convert("L")).astype(int)
+    ys, xs = np.where(a < 205)
+    w, h = im.size
+    return im.crop((max(0, xs.min() - marge), max(0, ys.min() - marge), min(w, xs.max() + marge), min(h, ys.max() + marge)))
 
 
 def main():
-    SORTIE.mkdir(parents=True, exist_ok=True)
-    fond().convert("RGB").save(SORTIE / "fond.png")
-    for nom, spec in RECADRAGES.items():
-        src, boite = spec if isinstance(spec[0], str) else (nom, spec)
-        Image.open(SCHEMAS / f"{src}.png").convert("RGB").crop(boite).save(SORTIE / f"{nom}.png")
-        print(nom)
-    vue_3d("3d_sa1_assemble", Camera(0.8, 0.45, 3.0, (-0.12, 0, 0), focale=2800))
-    vue_3d("3d_vue_eclatee", Camera(0.9, 0.5, 3.6, (-0.12, 0, 0.1), focale=2600), eclatement=1.0)
+    vues = Image.open(SOURCES / "vues_multiples.png").convert("RGB")
+    sorties = {
+        "cao_iso": serre(vues.crop((840, 470, 1586, 858)), 40),  # vue isométrique (quart bas droit)
+        "cao_dessus": serre(Image.open(SOURCES / "dessus.png").convert("RGB"), 35),
+        "cao_profil": serre(Image.open(SOURCES / "profil_gauche.png").convert("RGB"), 35),
+        "cao_face": serre(Image.open(SOURCES / "face.png").convert("RGB"), 35),
+    }
+    for nom, im in sorties.items():
+        im.save(DOSSIER / f"{nom}.png")
+        print(nom, im.size)
 
 
 if __name__ == "__main__":

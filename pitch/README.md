@@ -2,22 +2,22 @@
 
 | Fichier | Contenu |
 |---|---|
-| `sentinelle_aerienne_pitch.pptx` | Présentation PowerPoint (17 diapos). Le script de chaque intervenant est dans les **notes de l'orateur**. |
-| `script_oral.md` / `script_oral.docx` | Script oral complet par intervenant, ordre de passage, minutage (≈ 13 min) et questions probables du jury. |
-| `sentinelle_aerienne_pitch_v2.pptx` | **Version 9 diapos** (plan de l'équipe : double cœur STM32H7 + Hailo, innovations, polyvalence), notes d'oral dans chaque diapo. |
-| `notes_oral_v2.md` / `notes_oral_v2.docx` | Notes d'oral de la version 9 diapos (≈ 10 min). |
-| `questions_reponses.md` / `.docx` | 10 questions probables du jury par personne (+ 5 pour l'équipe), avec réponses. |
-| `assets/` | Images utilisées (maquette 3D du SA-1, schémas du dépôt). |
-| `outils/` | Générateurs : `preparer_images.py` (images), `contenu_pitch.js` (textes et script), `generer_pitch.js` (PowerPoint + script). |
+| `sentinelle_aerienne_pitch_court.pptx` | **Version 9 diapos**, selon le plan de l'équipe (≈ 10 min). Notes d'oral dans chaque diapo. |
+| `sentinelle_aerienne_pitch_complet.pptx` | Version 17 diapos (≈ 13 min), plus détaillée. Notes d'oral dans chaque diapo. |
+| `script_oral_court.md` / `.docx` | Script oral de la version 9 diapos, par intervenant. |
+| `script_oral_complet.md` / `.docx` | Script oral de la version 17 diapos. |
+| `questions_reponses.md` / `.docx` | 10 questions probables du jury par personne, avec réponses. |
+| `assets/cao/` | Captures SolidWorks du drone (`sources/`) et versions recadrées. |
+| `outils/` | `preparer_images.py` (recadrage), `intervenants.js`, `contenu_court.js`, `contenu_complet.js` (textes et notes), `generer.js` (PowerPoint + scripts). |
 
-Ordre de passage : Israel → Angelo → Makafui → Roger → Cédric → Israel (budget et conclusion).
-Chaque intervenant commence par se présenter.
+Le drone présenté est celui de la CAO SolidWorks : VTOL à rotors basculants (deux moteurs avant
+basculants en nacelle, un moteur arrière pour le vol vertical), empennage en V.
 
 Régénérer :
 
 ```bash
 python3 pitch/outils/preparer_images.py
-node pitch/outils/generer_pitch.js          # version 17 diapos
-node pitch/outils/generer_pitch_v2.js       # version 9 diapos ; modules : pptxgenjs react react-dom react-icons sharp
-python3 drone/outils/md_vers_docx.py pitch/script_oral.md pitch/script_oral.docx
+node pitch/outils/generer.js            # modules : pptxgenjs, sharp
+for f in script_oral_court script_oral_complet questions_reponses; do
+  python3 drone/outils/md_vers_docx.py pitch/$f.md pitch/$f.docx; done
 ```
