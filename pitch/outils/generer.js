@@ -13,6 +13,8 @@ const sharp = require("sharp");
 
 const RACINE = path.resolve(__dirname, "..");
 const CAO = path.join(RACINE, "assets", "cao");
+const COMPOSANTS = path.join(RACINE, "assets", "composants");
+const CREDIT = "Photos de composants (exemples) : wiki ArduPilot, CC BY-SA 3.0 ; Raspberry Pi Ltd, CC BY-SA 4.0.";
 
 const VERSIONS = {
   court: { contenu: "./contenu_court", pptx: "sentinelle_aerienne_pitch_court.pptx", script: "script_oral_court.md" },
@@ -46,10 +48,14 @@ async function construire(cle) {
   const C = pres.SchemeColor;
 
   // Tailles des images, pour les placer sans les déformer.
-  const tailles = {};
-  for (const f of fs.readdirSync(CAO).filter((f) => f.endsWith(".png"))) {
-    const m = await sharp(path.join(CAO, f)).metadata();
-    tailles[f.replace(".png", "")] = m.width / m.height;
+  // Noms courts : vues CAO (assets/cao/*.png) et photos de composants (assets/composants/*.jpg).
+  const tailles = {}, fichiers = {};
+  for (const [dossier, ext] of [[CAO, ".png"], [COMPOSANTS, ".jpg"]]) {
+    for (const f of fs.readdirSync(dossier).filter((f) => f.endsWith(ext))) {
+      const m = await sharp(path.join(dossier, f)).metadata();
+      tailles[f.replace(ext, "")] = m.width / m.height;
+      fichiers[f.replace(ext, "")] = path.join(dossier, f);
+    }
   }
 
   pres.defineSlideMaster({ title: "COUVERTURE", background: { color: C.background1 }, objects: [] });
@@ -97,7 +103,8 @@ async function construire(cle) {
     let iw = w, ih = w / r;
     if (ih > h) { ih = h; iw = h * r; }
     const ix = x + (w - iw) / 2, iy = y + (h - ih) / 2;
-    s.addImage({ path: path.join(CAO, nom + ".png"), x: ix, y: iy, w: iw, h: ih, altText: legende || "Vue CAO du drone" });
+    s.addImage({ path: fichiers[nom], x: ix, y: iy, w: iw, h: ih, altText: legende || "Vue CAO du drone" });
+    if (fichiers[nom].startsWith(COMPOSANTS)) s._photos = true;
     if (cadre) s.addShape(pres.shapes.RECTANGLE, { x: ix, y: iy, w: iw, h: ih, fill: { type: "none" }, line: { color: C.accent5, width: 0.75 }, objectName: "Cadre " + nom });
     if (legende) texte(s, legende, { x: ix, y: iy + ih + 0.06, w: iw, h: 0.28, fontSize: 11, color: C.text2, italic: true });
   }
@@ -214,8 +221,29 @@ async function construire(cle) {
     },
     chaine(s, d) {
       chaine(s, d.etapes, 1.6);
-      const w = (W - 2 * M - 0.6) / 2;
-      d.colonnes.forEach((c, i) => blocPuces(s, M + i * (w + 0.6), 3.15, w, 3.3, c.titre, c.puces, 16));
+      if (d.images) {
+        // Colonnes à gauche, photos à droite.
+        const wc = 5.6, w = (wc - 0.4) / 2;
+        d.colonnes.forEach((c, i) => blocPuces(s, M + i * (w + 0.4), 3.15, w, 3.3, c.titre, c.puces, 15));
+        const x0 = M + wc + 0.4, n = d.images.length, wi = (W - M - x0 - (n - 1) * 0.3) / n;
+        d.images.forEach((im, i) => image(s, im.f, x0 + i * (wi + 0.3), 3.2, wi, 2.9, im.legende));
+      } else {
+        const w = (W - 2 * M - 0.6) / 2;
+        d.colonnes.forEach((c, i) => blocPuces(s, M + i * (w + 0.6), 3.15, w, 3.3, c.titre, c.puces, 16));
+      }
+    },
+    galerie(s, d) {
+      // Grille de photos avec légende (nom en gras, rôle dessous).
+      const cols = d.colonnesGrille || 4, n = d.photos.length, lignes = Math.ceil(n / cols);
+      const gx = 0.3, gy = 0.2, cw = (W - 2 * M - (cols - 1) * gx) / cols, ch = (5.0 - (lignes - 1) * gy) / lignes;
+      d.photos.forEach((p, i) => {
+        const x = M + (i % cols) * (cw + gx), y = 1.45 + Math.floor(i / cols) * (ch + gy);
+        image(s, p.f, x, y, cw, ch - 0.6, null);
+        texte(s, [
+          { text: p.t, options: { bold: true, fontSize: 13, color: C.text1, breakLine: true } },
+          { text: p.d, options: { fontSize: 11, color: C.text2 } },
+        ], { x, y: y + ch - 0.55, w: cw, h: 0.55, align: "center", valign: "top" });
+      });
     },
     liste_num(s, d) {
       const wt = d.image ? 7.0 : W - 2 * M;
@@ -238,8 +266,9 @@ async function construire(cle) {
       const yFin = y + (d.rowH ?? 0.5) * (d.lignes.length + 1);
       if (d.bas) texte(s, d.bas, { x: M, y: yFin + 0.35, w: W - 2 * M, h: 0.45, fontSize: 16, color: C.text2 });
       if (d.imageBas) {
-        const yi = yFin + (d.bas ? 1.0 : 0.4);
-        image(s, d.imageBas.f, M, yi, W - 2 * M, H - 0.75 - yi - 0.4, d.imageBas.legende);
+        const yi = yFin + (d.bas ? 1.0 : 0.4), liste = [].concat(d.imageBas), n = liste.length;
+        const wi = (W - 2 * M - (n - 1) * 0.4) / n;
+        liste.forEach((im, i) => image(s, im.f, M + i * (wi + 0.4), yi, wi, H - 0.95 - yi - 0.4, im.legende));
       }
     },
     frise(s, d) {
@@ -296,6 +325,7 @@ async function construire(cle) {
     const s = pres.addSlide({ masterName: couverture ? "COUVERTURE" : "CONTENU", sectionTitle: section });
     if (!couverture) { s.addText(d.titre, { placeholder: "title" }); intervenant(s, d); }
     RENDU[d.type](s, d);
+    if (s._photos) texte(s, CREDIT, { x: M, y: H - 0.88, w: W - 2 * M, h: 0.22, fontSize: 9, color: C.text2, italic: true });
     notes(s, d);
   }
 

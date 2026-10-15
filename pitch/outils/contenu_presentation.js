@@ -92,7 +92,7 @@ Au centre, le fuselage contient la batterie, l'électronique et le module d'inte
         "Débattement vérifié à chaque check-list",
       ] },
     ],
-    images: [{ f: "z_dessus_avant", legende: "Nacelles et moteurs avant, vue de dessus" }, { f: "z_nacelle", legende: "Moteur, servo de basculement et nez, vue de profil" }],
+    images: [{ f: "moteur_brushless", legende: "Moteur sans balais (brushless)" }, { f: "esc_moteur", legende: "Variateur (ESC) relié à un moteur" }],
     notes: `Les deux moteurs avant sont la pièce maîtresse du drone. Chacun est monté dans une nacelle, avec un servomoteur qui le fait pivoter. Au décollage, il pousse vers le haut ; en croisière, il tire vers l'avant.
 L'avantage, c'est que les mêmes moteurs servent au décollage et à la croisière : on ne transporte pas de moteurs inutiles en vol, donc on gagne de la masse et de l'autonomie.
 Comme le basculement est critique, nous choisissons des servos à engrenages métal, avec une bonne marge, et leur débattement est vérifié avant chaque vol.`,
@@ -112,7 +112,7 @@ Comme le basculement est critique, nous choisissons des servos à engrenages mé
         "Moins de masse et de traînée",
       ] },
     ],
-    images: [{ f: "z_dessus_arriere", legende: "Moteur arrière et empennage en V, vue de dessus" }, { f: "z_queue", legende: "Queue du drone, vue de profil" }],
+    images: [{ f: "gouverne_servo", legende: "Gouverne d'empennage en V et sa commande par servo" }],
     notes: `À l'arrière, le moteur est logé sous la queue. Avec les deux moteurs avant, il forme un triangle qui tient le drone en équilibre en vol vertical. En croisière, il s'arrête.
 L'empennage en V remplace la dérive et la profondeur classiques. Avec deux surfaces au lieu de trois, on a moins de masse, moins de traînée et moins de servos. Chaque gouverne agit à la fois en profondeur et en direction, et c'est le contrôleur de vol qui fait le mélange.`,
   },
@@ -120,7 +120,7 @@ L'empennage en V remplace la dérive et la profondeur classiques. Avec deux surf
     type: "tableau", qui: "israel", duree: 40,
     titre: "Caractéristiques principales",
     entetes: ["Élément", "Choix retenu"],
-    colW: [3.0, 4.6], rowH: 0.5, taille: 15,
+    colW: [3.6, 8.433], rowH: 0.56, taille: 16,
     lignes: [
       ["Configuration", "VTOL à rotors basculants, trois moteurs"],
       ["Propulsion", "2 moteurs avant basculants + 1 moteur arrière"],
@@ -131,7 +131,6 @@ L'empennage en V remplace la dérive et la profondeur classiques. Avec deux surf
       ["Charge utile", "Caméra stabilisée jour/nuit"],
       ["Liaisons", "Vidéo HD, radio chiffrée, canal d'urgence"],
     ],
-    image: { f: "cao_profil", legende: "Vue de profil (SolidWorks)" },
     notes: `En résumé pour la partie drone : trois moteurs, dont deux basculants, un empennage en V, et une autonomie visée de 30 à 45 minutes. Le contrôleur de vol est une carte STM32H743 sous ArduPilot, le module IA un Raspberry Pi 5 avec une puce Hailo-8, et la charge utile une caméra stabilisée jour et nuit. Angelo va vous expliquer comment le drone vole.`,
   },
 
@@ -140,14 +139,14 @@ L'empennage en V remplace la dérive et la profondeur classiques. Avec deux surf
     type: "tableau", section: "Technologies", qui: "angelo", duree: 60,
     titre: "Le vol : du décollage vertical à la croisière",
     entetes: ["Phase", "Moteurs avant", "Moteur arrière", "Ce qui porte le drone"],
-    colW: [2.6, 3.4, 2.6, 3.433], rowH: 0.52, taille: 16,
+    colW: [2.6, 3.4, 2.6, 3.433], rowH: 0.7, taille: 17,
     lignes: [
       ["Décollage", "Vers le haut", "En marche", "Les trois moteurs"],
       ["Transition", "Basculent progressivement", "En marche", "Les moteurs, puis l'aile"],
       ["Croisière", "Vers l'avant, ils tirent", "Arrêté", "L'aile"],
       ["Atterrissage", "Reviennent vers le haut", "En marche", "Les trois moteurs"],
     ],
-    imageBas: { f: "cao_face", legende: "Vue de face : moteurs avant en position verticale (SolidWorks)" },
+    bas: "La transition est gérée automatiquement par ArduPilot, à partir de la vitesse air mesurée par le tube de Pitot.",
     notes: `Merci Israel. Bonjour, je m'appelle LOGO ADANTO Angelo, je m'occupe du logiciel embarqué et de la station sol.
 Le vol se fait en quatre phases. Au décollage, les moteurs avant sont tournés vers le haut et, avec le moteur arrière, ils soulèvent le drone. Pendant la transition, les moteurs avant basculent petit à petit vers l'avant : le drone accélère et l'aile commence à porter. En croisière, le moteur arrière s'arrête : les moteurs avant tirent le drone et l'aile le porte. À l'atterrissage, on fait l'inverse.
 C'est ArduPilot qui gère tout ça automatiquement, à partir de la vitesse air mesurée par le tube de Pitot.`,
@@ -165,7 +164,7 @@ C'est ArduPilot qui gère tout ça automatiquement, à partir de la vitesse air 
         ["Fusion des capteurs", "le contrôleur combine tout pour savoir où il est"],
       ] },
     ],
-    images: [{ f: "z_mat_gnss", legende: "Mât GNSS sur le dos du fuselage" }, { f: "z_nacelle", legende: "Tube de Pitot dans le nez" }],
+    images: [{ f: "gnss", legende: "Module GNSS avec compas intégré" }, { f: "pitot", legende: "Tube de Pitot (prises de pression)" }],
     notes: `Pour savoir où il est et comment il vole, le drone utilise plusieurs capteurs. Deux récepteurs GPS sur le mât donnent la position. Le tube de Pitot, dans le nez, mesure la vitesse de l'air. La centrale inertielle mesure les accélérations et les rotations, le baromètre l'altitude, et le compas la direction.
 Le contrôleur de vol combine toutes ces mesures. Si une source donne une valeur qui ne colle pas avec les autres, par exemple un GPS brouillé, elle est écartée. Makafui va vous présenter l'architecture électronique.`,
   },
@@ -212,7 +211,28 @@ Ils communiquent en MAVLink : l'IA reçoit la position et renvoie ses alertes, m
 L'énergie : la batterie lithium-polymère alimente un module de puissance qui mesure la tension et le courant, puis trois variateurs qui règlent la vitesse des trois moteurs.
 Le pilotage : les capteurs envoient leurs mesures au contrôleur de vol, qui commande les servos de basculement et les gouvernes de l'empennage, et communique par les liaisons radio.
 La mission : la caméra envoie ses images au Raspberry Pi, qui produit les alertes envoyées à la station sol.
-Nous prévoyons des alimentations séparées : une pour les radios, et une dédiée au Raspberry Pi, pour qu'aucune ne perturbe l'autre. Roger va vous présenter le module IA.`,
+Nous prévoyons des alimentations séparées : une pour les radios, et une dédiée au Raspberry Pi, pour qu'aucune ne perturbe l'autre.`,
+  },
+  {
+    type: "galerie", qui: "israel", duree: 60,
+    titre: "Les principaux composants",
+    colonnesGrille: 6,
+    photos: [
+      { f: "batterie_lipo", t: "Batterie LiPo", d: "réserve d'énergie" },
+      { f: "module_puissance", t: "Module de puissance", d: "mesure tension et courant" },
+      { f: "esc_moteur", t: "Variateurs (ESC)", d: "règlent la vitesse des moteurs" },
+      { f: "moteur_brushless", t: "Moteurs brushless", d: "2 avant basculants, 1 arrière" },
+      { f: "controleur_h743", t: "Contrôleur de vol", d: "STM32H743 sous ArduPilot" },
+      { f: "gnss", t: "Module GNSS", d: "position et compas" },
+      { f: "pitot", t: "Tube de Pitot", d: "vitesse air" },
+      { f: "radio_longue_portee", t: "Radio longue portée", d: "télémétrie chiffrée" },
+      { f: "radios_rc", t: "Radiocommande", d: "pilotage et canal d'urgence" },
+      { f: "raspberry_pi5", t: "Raspberry Pi 5", d: "ordinateur du module IA" },
+      { f: "ai_hat_plus", t: "AI HAT+ (Hailo-8)", d: "accélérateur d'IA, 26 TOPS" },
+      { f: "camera", t: "Caméra", d: "images pour l'IA" },
+    ],
+    notes: `Voici à quoi ressemblent les principaux composants. Pour l'énergie : la batterie lithium-polymère, le module de puissance, les variateurs et les moteurs sans balais. Pour le pilotage : le contrôleur de vol à STM32H743, le module GNSS avec son compas, le tube de Pitot, la radio longue portée et la radiocommande. Et pour la mission : le Raspberry Pi 5, sa carte d'accélération Hailo-8, et la caméra.
+Ce sont des composants standards, faciles à trouver et à remplacer. Roger va vous présenter le module d'intelligence artificielle.`,
   },
   {
     type: "chaine", qui: "roger", duree: 70,
@@ -237,6 +257,7 @@ Nous prévoyons des alimentations séparées : une pour les radios, et une dédi
         "Débris et objets au sol",
       ] },
     ],
+    images: [{ f: "raspberry_pi5", legende: "Raspberry Pi 5" }, { f: "ai_hat_plus", legende: "AI HAT+ (puce Hailo-8) monté sur le Pi" }],
     notes: `Merci Israel. Bonjour, je m'appelle KAINWANG Roger, je m'occupe de l'intelligence artificielle et des données.
 Le module IA, c'est un Raspberry Pi 5 avec une carte AI HAT+ qui porte une puce Hailo-8 de 26 TOPS. Tout le calcul se fait à bord : aucune image ne part sur internet.
 La caméra filme. Le détecteur YOLOv8s repère les personnes, les véhicules et les débris au sol. On ne garde que ce qui est dans la zone utile, la piste et ses abords. Un suivi relie les détections d'une image à l'autre pour qu'un objet ne déclenche qu'une seule alerte. Puis l'alerte part vers la station sol avec une photo de preuve.`,
@@ -287,14 +308,14 @@ Toutes ces données sont archivées par le back-end de Cédric : une API REST et
     type: "tableau", qui: "makafui", duree: 55,
     titre: "Trois liaisons indépendantes",
     entetes: ["Liaison", "Ce qu'elle transporte", "Portée visée"],
-    colW: [4.0, 5.0, 3.033], rowH: 0.62, taille: 16,
+    colW: [4.0, 5.0, 3.033], rowH: 0.5, taille: 16,
     lignes: [
       ["Vidéo HD", "Image de la caméra et informations de vol", "10 à 15 km"],
       ["Radio longue portée chiffrée", "Télémétrie, ordres et alertes de l'IA", "30 à 50 km (théorique)"],
       ["Canal d'urgence ExpressLRS", "Retour au point de départ, coupure des moteurs", "Indépendant des autres"],
+      ["Écartée : 4G", "Couverture incertaine ; satellite à l'essai en secours", ""],
     ],
-    bas: "Écartée : la 4G (couverture incertaine). La liaison satellite est à l'essai comme secours.",
-    imageBas: { f: "z_face_centre", legende: "Antennes placées hors des zones en carbone" },
+    imageBas: [{ f: "radio_longue_portee", legende: "Radio de télémétrie longue portée (type RFD900)" }, { f: "radios_rc", legende: "Radiocommandes et récepteurs" }],
     notes: `Merci Angelo. Notre principe : ne jamais dépendre d'un seul lien. Nous avons trois liaisons séparées. Un lien vidéo HD pour voir ce que voit le drone. Une radio longue portée chiffrée pour la télémétrie, les ordres et les alertes de l'IA. Et un canal d'urgence indépendant, qui sert uniquement à faire revenir le drone ou à couper les moteurs.
 La 4G est écartée car la couverture n'est pas garantie, et le satellite est à l'essai comme secours. Les antennes sont placées hors des zones en carbone, qui bloquent les ondes.`,
   },
@@ -413,7 +434,6 @@ La cybersécurité : la liaison est chiffrée, chaque message est signé avec un
       ["Novembre", "Essais au sol, en vol et de sécurité", ""],
       ["Décembre 2026", "Finale et démonstration", ""],
     ],
-    image: { f: "cao_profil", legende: "Conception SolidWorks terminée" },
     notes: `Côté calendrier, la candidature a été validée en août, la conception faite en septembre et le dossier déposé. Nous sommes en phase de prototypage et d'intégration. En novembre viendront les essais au sol, en vol et de sécurité, pour être prêts pour la finale en décembre. Je rends la parole à Israel.`,
   },
   {

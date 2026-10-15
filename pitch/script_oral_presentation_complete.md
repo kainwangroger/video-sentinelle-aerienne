@@ -1,8 +1,8 @@
-# Pitch Sentinelle Aérienne : script oral (23 diapos)
+# Pitch Sentinelle Aérienne : script oral (24 diapos)
 
 Support : `sentinelle_aerienne_presentation_complete.pptx`. Le même texte se trouve dans les notes de l'orateur de chaque diapo.
 
-Durée indicative : environ 21 minutes.
+Durée indicative : environ 22 minutes.
 
 | Diapo | Titre | Qui parle | Durée |
 |---|---|---|---|
@@ -17,18 +17,19 @@ Durée indicative : environ 21 minutes.
 | 9 | Les capteurs de navigation | Angelo LOGO ADANTO | 50 s |
 | 10 | Architecture électronique : la sécurité d'abord | Makafui de MEDEIROS | 65 s |
 | 11 | Énergie, pilotage et mission | Israel AWADE | 55 s |
-| 12 | Le module d'intelligence artificielle | Roger KAINWANG | 70 s |
-| 13 | Données et fiabilité de l'IA | Roger KAINWANG | 60 s |
-| 14 | Station sol et back-end | Angelo LOGO ADANTO | 50 s |
-| 15 | Trois liaisons indépendantes | Makafui de MEDEIROS | 55 s |
-| 16 | Les avantages | Israel AWADE | 50 s |
-| 17 | Les risques et nos réponses | Israel AWADE puis Makafui de MEDEIROS | 90 s |
-| 18 | La réglementation | Cédric KODJOVI | 70 s |
-| 19 | La sécurité | Makafui de MEDEIROS | 65 s |
-| 20 | Domaines d'application | Cédric KODJOVI | 55 s |
-| 21 | Calendrier | Cédric KODJOVI | 35 s |
-| 22 | Budget prévisionnel | Israel AWADE | 35 s |
-| 23 | En résumé | Israel AWADE | 35 s |
+| 12 | Les principaux composants | Israel AWADE | 60 s |
+| 13 | Le module d'intelligence artificielle | Roger KAINWANG | 70 s |
+| 14 | Données et fiabilité de l'IA | Roger KAINWANG | 60 s |
+| 15 | Station sol et back-end | Angelo LOGO ADANTO | 50 s |
+| 16 | Trois liaisons indépendantes | Makafui de MEDEIROS | 55 s |
+| 17 | Les avantages | Israel AWADE | 50 s |
+| 18 | Les risques et nos réponses | Israel AWADE puis Makafui de MEDEIROS | 90 s |
+| 19 | La réglementation | Cédric KODJOVI | 70 s |
+| 20 | La sécurité | Makafui de MEDEIROS | 65 s |
+| 21 | Domaines d'application | Cédric KODJOVI | 55 s |
+| 22 | Calendrier | Cédric KODJOVI | 35 s |
+| 23 | Budget prévisionnel | Israel AWADE | 35 s |
+| 24 | En résumé | Israel AWADE | 35 s |
 
 ## 1. Sentinelle Aérienne (Israel AWADE)
 
@@ -114,9 +115,15 @@ Le pilotage : les capteurs envoient leurs mesures au contrôleur de vol, qui com
 
 La mission : la caméra envoie ses images au Raspberry Pi, qui produit les alertes envoyées à la station sol.
 
-Nous prévoyons des alimentations séparées : une pour les radios, et une dédiée au Raspberry Pi, pour qu'aucune ne perturbe l'autre. Roger va vous présenter le module IA.
+Nous prévoyons des alimentations séparées : une pour les radios, et une dédiée au Raspberry Pi, pour qu'aucune ne perturbe l'autre.
 
-## 12. Le module d'intelligence artificielle (Roger KAINWANG)
+## 12. Les principaux composants (Israel AWADE)
+
+Voici à quoi ressemblent les principaux composants. Pour l'énergie : la batterie lithium-polymère, le module de puissance, les variateurs et les moteurs sans balais. Pour le pilotage : le contrôleur de vol à STM32H743, le module GNSS avec son compas, le tube de Pitot, la radio longue portée et la radiocommande. Et pour la mission : le Raspberry Pi 5, sa carte d'accélération Hailo-8, et la caméra.
+
+Ce sont des composants standards, faciles à trouver et à remplacer. Roger va vous présenter le module d'intelligence artificielle.
+
+## 13. Le module d'intelligence artificielle (Roger KAINWANG)
 
 Merci Israel. Bonjour, je m'appelle KAINWANG Roger, je m'occupe de l'intelligence artificielle et des données.
 
@@ -124,29 +131,29 @@ Le module IA, c'est un Raspberry Pi 5 avec une carte AI HAT+ qui porte une puce 
 
 La caméra filme. Le détecteur YOLOv8s repère les personnes, les véhicules et les débris au sol. On ne garde que ce qui est dans la zone utile, la piste et ses abords. Un suivi relie les détections d'une image à l'autre pour qu'un objet ne déclenche qu'une seule alerte. Puis l'alerte part vers la station sol avec une photo de preuve.
 
-## 13. Données et fiabilité de l'IA (Roger KAINWANG)
+## 14. Données et fiabilité de l'IA (Roger KAINWANG)
 
 Pour le modèle, nous ne partons pas de zéro : nous prenons un YOLOv8s déjà entraîné et nous l'adaptons à notre mission, avec FOD-A, une base publique de plus de 30 000 débris de piste annotés, et des images prises avec notre caméra, vues d'en haut. Nous ajoutons des scènes vides avec des ombres et des marquages pour éviter les fausses alertes.
 
 Si l'IA voit un objet qu'elle ne sait pas classer, elle le signale « à vérifier », avec l'image. Si la liaison est coupée, elle garde ses alertes. Et c'est toujours l'humain qui décide : l'IA ne commande jamais le drone. Angelo va vous montrer la station sol.
 
-## 14. Station sol et back-end (Angelo LOGO ADANTO)
+## 15. Station sol et back-end (Angelo LOGO ADANTO)
 
 Merci Roger. Au sol, nous développons la station en Flutter, avec une version mobile et une version web. L'opérateur prépare sa mission, définit la zone autorisée, suit la télémétrie en direct, et reçoit les alertes de l'IA avec leur image. La vidéo est enregistrée.
 
 Toutes ces données sont archivées par le back-end de Cédric : une API REST et une base MySQL, avec l'historique des vols et des alertes, et des journaux de vol signés. Makafui va vous présenter les liaisons.
 
-## 15. Trois liaisons indépendantes (Makafui de MEDEIROS)
+## 16. Trois liaisons indépendantes (Makafui de MEDEIROS)
 
 Merci Angelo. Notre principe : ne jamais dépendre d'un seul lien. Nous avons trois liaisons séparées. Un lien vidéo HD pour voir ce que voit le drone. Une radio longue portée chiffrée pour la télémétrie, les ordres et les alertes de l'IA. Et un canal d'urgence indépendant, qui sert uniquement à faire revenir le drone ou à couper les moteurs.
 
 La 4G est écartée car la couverture n'est pas garantie, et le satellite est à l'essai comme secours. Les antennes sont placées hors des zones en carbone, qui bloquent les ondes.
 
-## 16. Les avantages (Israel AWADE)
+## 17. Les avantages (Israel AWADE)
 
 [Israel] Pour résumer ce que notre drone apporte : il n'a pas besoin de piste, il vole longtemps grâce à son aile, et ses moteurs basculants servent aux deux phases de vol. L'IA à bord donne l'alerte pendant le vol, sans internet. La liaison est sécurisée. Les agents n'ont plus à parcourir la piste eux-mêmes. Et la même plateforme peut servir à d'autres missions.
 
-## 17. Les risques et nos réponses (Israel AWADE puis Makafui de MEDEIROS)
+## 18. Les risques et nos réponses (Israel AWADE puis Makafui de MEDEIROS)
 
 Nous avons aussi listé les risques, avec une réponse pour chacun.
 
@@ -154,7 +161,7 @@ Si la liaison radio est perdue, le drone rentre seul et atterrit à la verticale
 
 [Makafui] Contre le brouillage et le leurrage GPS, nous comparons deux GPS avec les autres capteurs. Contre le piratage, la liaison est chiffrée et les ordres sont signés. Le géorepérage empêche de sortir de la zone. Et si l'IA hésite, elle signale « à vérifier » : c'est l'humain qui décide.
 
-## 18. La réglementation (Cédric KODJOVI)
+## 19. La réglementation (Cédric KODJOVI)
 
 [Cédric] Côté réglementation, deux familles de règles.
 
@@ -162,7 +169,7 @@ Pour le vol : nous ne volons qu'avec l'autorisation de l'ANAC, en vue directe du
 
 Pour les ondes et les données : nos fréquences doivent être autorisées par l'ARCEP. Comme le drone peut filmer des personnes, nous respectons la loi togolaise sur la protection des données : pas de reconnaissance faciale, on ne garde que les images d'alerte, et l'accès est réservé aux personnes autorisées.
 
-## 19. La sécurité (Makafui de MEDEIROS)
+## 20. La sécurité (Makafui de MEDEIROS)
 
 [Makafui] La sécurité se joue à deux niveaux.
 
@@ -170,19 +177,19 @@ La sécurité du vol : le contrôleur est séparé de l'IA ; en cas de perte de 
 
 La cybersécurité : la liaison est chiffrée, chaque message est signé avec une clé chargée au sol, donc un faux ordre est rejeté. Nous détectons le brouillage, nous comparons les sources de position contre le leurrage GPS, et les journaux de vol sont signés.
 
-## 20. Domaines d'application (Cédric KODJOVI)
+## 21. Domaines d'application (Cédric KODJOVI)
 
 [Cédric] Notre premier usage, c'est l'aéroport. Mais la même plateforme peut servir en agriculture et pour l'environnement, par exemple pour repérer des départs de feux de brousse, pour inspecter des lignes électriques, des ponts ou le port de Lomé, pour livrer de petits colis médicaux dans des zones enclavées avec une version adaptée, ou pour la cartographie. À chaque fois, on change seulement la charge utile et le modèle d'IA.
 
-## 21. Calendrier (Cédric KODJOVI)
+## 22. Calendrier (Cédric KODJOVI)
 
 Côté calendrier, la candidature a été validée en août, la conception faite en septembre et le dossier déposé. Nous sommes en phase de prototypage et d'intégration. En novembre viendront les essais au sol, en vol et de sécurité, pour être prêts pour la finale en décembre. Je rends la parole à Israel.
 
-## 22. Budget prévisionnel (Israel AWADE)
+## 23. Budget prévisionnel (Israel AWADE)
 
 Merci Cédric. Notre budget est estimé entre 730 000 et 1 400 000 francs CFA pour le drone, avec en plus 120 000 à 160 000 francs pour le module d'intelligence artificielle. Nous avons choisi des composants courants, faciles à trouver et à remplacer.
 
-## 23. En résumé (Israel AWADE)
+## 24. En résumé (Israel AWADE)
 
 Pour résumer, la Sentinelle Aérienne décolle partout, vole longtemps grâce à son aile, analyse ses images à bord et communique de façon sécurisée. Ses risques sont identifiés et traités, et elle respecte le cadre réglementaire.
 
