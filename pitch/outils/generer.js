@@ -17,6 +17,7 @@ const CAO = path.join(RACINE, "assets", "cao");
 const VERSIONS = {
   court: { contenu: "./contenu_court", pptx: "sentinelle_aerienne_pitch_court.pptx", script: "script_oral_court.md" },
   complet: { contenu: "./contenu_complet", pptx: "sentinelle_aerienne_pitch_complet.pptx", script: "script_oral_complet.md" },
+  presentation: { contenu: "./contenu_presentation", pptx: "sentinelle_aerienne_presentation_complete.pptx", script: "script_oral_presentation_complete.md" },
   risques: { contenu: "./contenu_risques", pptx: "sentinelle_aerienne_risques_securite.pptx", script: "script_oral_risques.md" },
 };
 
@@ -243,6 +244,7 @@ async function construire(cle) {
     },
     frise(s, d) {
       frise(s, d.etapes, 2.3);
+      if (d.image) image(s, d.image.f, M, 4.3, W - 2 * M, 1.9, d.image.legende);
       if (d.fin) {
         boite(s, M, 4.6, W - 2 * M, 1.6, "Remerciements");
         texte(s, [
@@ -250,6 +252,33 @@ async function construire(cle) {
           { text: d.fin[1], options: { fontSize: 17, color: C.text2 } },
         ], { x: M + 0.35, y: 4.6, w: W - 2 * M - 0.7, h: 1.6, valign: "middle" });
       }
+    },
+    annotee(s, d) {
+      // Vue du drone au centre, étiquettes à gauche et à droite reliées aux pièces.
+      const r = tailles[d.image], hi = 4.6, wi = hi * r > 6.6 ? 6.6 : hi * r, hh = wi / r;
+      const xi = (W - wi) / 2, yi = 1.5 + (4.9 - hh) / 2;
+      s.addImage({ path: path.join(CAO, d.image + ".png"), x: xi, y: yi, w: wi, h: hh, altText: "Vue de dessus annotée" });
+      const lw = xi - M - 0.25;
+      for (const e of d.etiquettes) {
+        const px = xi + e.fx * wi, py = yi + e.fy * hh;
+        const gauche = e.cote === "g", lx = gauche ? M : xi + wi + 0.25;
+        texte(s, [
+          { text: e.t, options: { bold: true, fontSize: 14, color: C.text1, breakLine: true } },
+          { text: e.d, options: { fontSize: 11, color: C.text2 } },
+        ], { x: lx, y: e.ly - 0.25, w: lw, h: 0.6, align: gauche ? "right" : "left", valign: "middle" });
+        const ax = gauche ? M + lw + 0.05 : lx - 0.05;
+        s.addShape(pres.shapes.LINE, { x: Math.min(ax, px), y: Math.min(e.ly, py), w: Math.abs(px - ax), h: Math.abs(py - e.ly),
+          flipV: (px > ax) !== (py > e.ly), line: { color: C.accent1, width: 1 } });
+        s.addShape(pres.shapes.OVAL, { x: px - 0.06, y: py - 0.06, w: 0.12, h: 0.12, fill: { color: C.accent1 }, line: { type: "none" } });
+      }
+    },
+    rangees(s, d) {
+      d.rangees.forEach((r, i) => {
+        const y = 1.5 + i * 1.7;
+        texte(s, r.titre, { x: M, y, w: 6, h: 0.35, fontSize: 16, bold: true, color: C.accent1 });
+        chaine(s, r.etapes, y + 0.4, 1.0);
+      });
+      if (d.bas) texte(s, d.bas, { x: M, y: 6.55, w: W - 2 * M, h: 0.3, fontSize: 12, italic: true, color: C.text2 });
     },
     fin(s, d) {
       texte(s, d.titre, { x: M, y: 1.0, w: 6.2, h: 0.8, fontSize: 36, bold: true, color: C.text1 });

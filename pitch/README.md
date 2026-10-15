@@ -2,6 +2,7 @@
 
 | Fichier | Contenu |
 |---|---|
+| `sentinelle_aerienne_presentation_complete.pptx` + `script_oral_presentation_complete.docx` | **Présentation complète, 23 diapos (≈ 20 min)** : drone et composants (vues SolidWorks annotées et zooms), technologies, IA, liaisons, avantages, risques, réglementation, sécurité, applications, calendrier, budget. |
 | `sentinelle_aerienne_pitch_court.pptx` | **Version 9 diapos**, selon le plan de l'équipe (≈ 10 min). Notes d'oral dans chaque diapo. |
 | `sentinelle_aerienne_pitch_complet.pptx` | Version 17 diapos (≈ 13 min), plus détaillée. Notes d'oral dans chaque diapo. |
 | `script_oral_court.md` / `.docx` | Script oral de la version 9 diapos, par intervenant. |
