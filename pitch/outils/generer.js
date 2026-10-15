@@ -17,6 +17,7 @@ const CAO = path.join(RACINE, "assets", "cao");
 const VERSIONS = {
   court: { contenu: "./contenu_court", pptx: "sentinelle_aerienne_pitch_court.pptx", script: "script_oral_court.md" },
   complet: { contenu: "./contenu_complet", pptx: "sentinelle_aerienne_pitch_complet.pptx", script: "script_oral_complet.md" },
+  risques: { contenu: "./contenu_risques", pptx: "sentinelle_aerienne_risques_securite.pptx", script: "script_oral_risques.md" },
 };
 
 const THEME = {

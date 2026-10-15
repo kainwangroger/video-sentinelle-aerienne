@@ -6,6 +6,7 @@
 | `sentinelle_aerienne_pitch_complet.pptx` | Version 17 diapos (≈ 13 min), plus détaillée. Notes d'oral dans chaque diapo. |
 | `script_oral_court.md` / `.docx` | Script oral de la version 9 diapos, par intervenant. |
 | `script_oral_complet.md` / `.docx` | Script oral de la version 17 diapos. |
+| `sentinelle_aerienne_risques_securite.pptx` + `script_oral_risques.docx` | Avantages, risques, réglementation et sécurité (7 diapos, ≈ 6 min). |
 | `questions_reponses.md` / `.docx` | 10 questions probables du jury par personne, avec réponses. |
 | `assets/cao/` | Captures SolidWorks du drone (`sources/`) et versions recadrées. |
 | `outils/` | `preparer_images.py` (recadrage), `intervenants.js`, `contenu_court.js`, `contenu_complet.js` (textes et notes), `generer.js` (PowerPoint + scripts). |
